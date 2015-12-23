@@ -9,9 +9,10 @@ class Next {
   Queue<Middleware> _handlers;
   Next(this._handlers);
 
-  HttpResponseContent handle(HttpRequest request, HttpResponseContent content) {
+  Future<HttpResponseContent> handle(
+      HttpRequest request, HttpResponseContent content) {
     if (this._handlers.isEmpty) {
-      return content;
+      return new Future.value(content);
     } else {
       Middleware handler = this._handlers.removeFirst();
       return handler.handle(request, content, this);
@@ -19,9 +20,7 @@ class Next {
   }
 }
 
-/// Represents pipeline of middleware handlers.
-///
-/// This class is main entry point to the library.
+/// Represents a pipeline of middleware handlers.
 class Pipeline {
   List<Middleware> handlers;
 
@@ -29,7 +28,7 @@ class Pipeline {
   Pipeline(this.handlers);
 
   /// Executes middleware pipeline and returns resulting [HttpResponseContent].
-  HttpResponseContent handle(HttpRequest request) {
+  Future<HttpResponseContent> handle(HttpRequest request) {
     Queue queue = new Queue.from(this.handlers);
     Next next = new Next(queue);
     HttpResponseContent content = new HttpResponseContent.empty();

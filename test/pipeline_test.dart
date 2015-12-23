@@ -1,26 +1,28 @@
 library corsac_middleware.test.pipeline;
 
+import 'dart:async';
 import 'dart:io';
-import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
+
 import 'package:corsac_middleware/corsac_middleware.dart';
+import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 class MockHttpRequest extends Mock implements HttpRequest {}
 
 void main() {
   group('Pipeline:', () {
-    test('it executes one handler', () {
+    test('it executes one handler', () async {
       Pipeline p = new Pipeline([new SimpleMiddleware()]);
 
-      HttpResponseContent content = p.handle(new MockHttpRequest());
+      HttpResponseContent content = await p.handle(new MockHttpRequest());
       expect(content.body, equals('Test'));
     });
 
-    test('it executes two handlers', () {
+    test('it executes two handlers', () async {
       Pipeline p =
           new Pipeline([new ChainingMiddleware(), new SimpleMiddleware()]);
 
-      HttpResponseContent response = p.handle(new MockHttpRequest());
+      HttpResponseContent response = await p.handle(new MockHttpRequest());
       expect(response.body, equals('TestChained'));
     });
   });
@@ -28,17 +30,17 @@ void main() {
 
 class SimpleMiddleware implements Middleware {
   @override
-  HttpResponseContent handle(
+  Future<HttpResponseContent> handle(
       HttpRequest request, HttpResponseContent content, Next next) {
-    return new HttpResponseContent.text('Test');
+    return new Future.value(new HttpResponseContent.text('Test'));
   }
 }
 
 class ChainingMiddleware implements Middleware {
   @override
-  HttpResponseContent handle(
-      HttpRequest request, HttpResponseContent content, Next next) {
-    HttpResponseContent r = next.handle(request, content);
+  Future<HttpResponseContent> handle(
+      HttpRequest request, HttpResponseContent content, Next next) async {
+    HttpResponseContent r = await next.handle(request, content);
 
     return new HttpResponseContent.text(r.body + 'Chained');
   }

@@ -36,6 +36,6 @@ class HttpResponseContent {
 
 /// Interface for middleware handlers.
 abstract class Middleware {
-  HttpResponseContent handle(
+  Future<HttpResponseContent> handle(
       HttpRequest request, HttpResponseContent content, Next next);
 }
