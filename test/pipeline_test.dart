@@ -14,15 +14,15 @@ void main() {
     test('it executes one handler', () async {
       Pipeline p = new Pipeline([new SimpleMiddleware()]);
 
-      HttpResponseContent content = await p.handle(new MockHttpRequest());
-      expect(content.body, equals('Test'));
+      HandleContext context = await p.handle(new MockHttpRequest());
+      expect(context.body, equals('Test'));
     });
 
     test('it executes two handlers', () async {
       Pipeline p =
           new Pipeline([new ChainingMiddleware(), new SimpleMiddleware()]);
 
-      HttpResponseContent response = await p.handle(new MockHttpRequest());
+      HandleContext response = await p.handle(new MockHttpRequest());
       expect(response.body, equals('TestChained'));
     });
   });
@@ -30,18 +30,18 @@ void main() {
 
 class SimpleMiddleware implements Middleware {
   @override
-  Future<HttpResponseContent> handle(
-      HttpRequest request, HttpResponseContent content, Next next) {
-    return new Future.value(new HttpResponseContent.text('Test'));
+  Future<HandleContext> handle(
+      HttpRequest request, HandleContext context, Next next) {
+    return new Future.value(new HandleContext.text('Test'));
   }
 }
 
 class ChainingMiddleware implements Middleware {
   @override
-  Future<HttpResponseContent> handle(
-      HttpRequest request, HttpResponseContent content, Next next) async {
-    HttpResponseContent r = await next.handle(request, content);
+  Future<HandleContext> handle(
+      HttpRequest request, HandleContext context, Next next) async {
+    HandleContext r = await next.handle(request, context);
 
-    return new HttpResponseContent.text(r.body + 'Chained');
+    return new HandleContext.text(r.body + 'Chained');
   }
 }

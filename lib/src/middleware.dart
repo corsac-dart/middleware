@@ -11,31 +11,36 @@ part of corsac_middleware;
 ///
 /// It is allowed for middleware handlers to set any other field on the
 /// response object directly.
-class HttpResponseContent {
+class HandleContext {
   final int statusCode;
   final ContentType contentType;
   final String body;
 
-  HttpResponseContent(this.statusCode, this.contentType, this.body);
+  HandleContext(this.statusCode, this.contentType, this.body);
 
-  factory HttpResponseContent.empty({int statusCode: HttpStatus.OK}) =>
-      new HttpResponseContent(statusCode, ContentType.TEXT, '');
+  factory HandleContext.empty({int statusCode: HttpStatus.OK}) =>
+      new HandleContext(statusCode, ContentType.TEXT, '');
 
-  factory HttpResponseContent.text(String text,
-          {int statusCode: HttpStatus.OK}) =>
-      new HttpResponseContent(statusCode, ContentType.TEXT, text);
+  factory HandleContext.text(String text, {int statusCode: HttpStatus.OK}) =>
+      new HandleContext(statusCode, ContentType.TEXT, text);
 
-  factory HttpResponseContent.json(Object data,
-          {int statusCode: HttpStatus.OK}) =>
-      new HttpResponseContent(statusCode, ContentType.JSON, JSON.encode(data));
+  factory HandleContext.json(Object data, {int statusCode: HttpStatus.OK}) =>
+      new HandleContext(statusCode, ContentType.JSON, JSON.encode(data));
 
-  factory HttpResponseContent.html(String html,
-          {int statusCode: HttpStatus.OK}) =>
-      new HttpResponseContent(statusCode, ContentType.HTML, html);
+  factory HandleContext.html(String html, {int statusCode: HttpStatus.OK}) =>
+      new HandleContext(statusCode, ContentType.HTML, html);
+
+  /// Applies results of request handling to actual [HttpResponse].
+  void apply(HttpResponse response) {
+    response
+      ..statusCode = statusCode
+      ..headers.contentType = contentType
+      ..write(body);
+  }
 }
 
 /// Interface for middleware handlers.
 abstract class Middleware {
-  Future<HttpResponseContent> handle(
-      HttpRequest request, HttpResponseContent content, Next next);
+  Future<HandleContext> handle(
+      HttpRequest request, HandleContext context, Next next);
 }

@@ -2,7 +2,7 @@ name: corsac_middleware
 version: 0.1.0-dev
 description: Corsac Middleware Pipeline component
 author: Anatoly Pulyaevskiy <anatoly.pulyaevskiy@gmail.com>
-#homepage: https://www.example.com
+homepage: https://github.com/corsac-dart/middleware
 
 environment:
     sdk: '>=1.9.0 <2.0.0'
