@@ -9,12 +9,12 @@ class Next {
   Queue<Middleware> _handlers;
   Next(this._handlers);
 
-  Future<HandleContext> handle(HttpRequest request, HandleContext context) {
+  Future handle(HttpRequest request) {
     if (this._handlers.isEmpty) {
-      return new Future.value(context);
+      return new Future.value();
     } else {
       Middleware handler = this._handlers.removeFirst();
-      return handler.handle(request, context, this);
+      return handler.handle(request, this);
     }
   }
 }
@@ -26,11 +26,11 @@ class Pipeline {
   /// Pipeline constructor.
   Pipeline(this.handlers);
 
-  /// Executes middleware pipeline and returns resulting [HandleContext].
-  Future<HandleContext> handle(HttpRequest request) {
+  /// Executes middleware pipeline.
+  Future handle(HttpRequest request) {
     Queue queue = new Queue.from(this.handlers);
     Next next = new Next(queue);
-    HandleContext context = new HandleContext.empty();
-    return next.handle(request, context);
+
+    return next.handle(request);
   }
 }

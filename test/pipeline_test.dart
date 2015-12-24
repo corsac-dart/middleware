@@ -9,39 +9,45 @@ import 'package:test/test.dart';
 
 class MockHttpRequest extends Mock implements HttpRequest {}
 
+class MockHttpResponse extends Mock implements HttpResponse {}
+
 void main() {
   group('Pipeline:', () {
     test('it executes one handler', () async {
       Pipeline p = new Pipeline([new SimpleMiddleware()]);
-
-      HandleContext context = await p.handle(new MockHttpRequest());
-      expect(context.body, equals('Test'));
+      var request = new MockHttpRequest();
+      var response = new MockHttpResponse();
+      when(request.response).thenReturn(response);
+      await p.handle(request);
+      verify(response.writeln('Test'));
     });
 
     test('it executes two handlers', () async {
       Pipeline p =
           new Pipeline([new ChainingMiddleware(), new SimpleMiddleware()]);
 
-      HandleContext response = await p.handle(new MockHttpRequest());
-      expect(response.body, equals('TestChained'));
+      var request = new MockHttpRequest();
+      var response = new MockHttpResponse();
+      when(request.response).thenReturn(response);
+      await p.handle(request);
+      verify(response.writeln('Test'));
+      verify(response.writeln('Chained'));
     });
   });
 }
 
 class SimpleMiddleware implements Middleware {
   @override
-  Future<HandleContext> handle(
-      HttpRequest request, HandleContext context, Next next) {
-    return new Future.value(new HandleContext.text('Test'));
+  Future handle(HttpRequest request, Next next) {
+    request.response.writeln('Test');
+    return new Future.value();
   }
 }
 
 class ChainingMiddleware implements Middleware {
   @override
-  Future<HandleContext> handle(
-      HttpRequest request, HandleContext context, Next next) async {
-    HandleContext r = await next.handle(request, context);
-
-    return new HandleContext.text(r.body + 'Chained');
+  Future handle(HttpRequest request, Next next) async {
+    await next.handle(request);
+    request.response.writeln('Chained');
   }
 }
