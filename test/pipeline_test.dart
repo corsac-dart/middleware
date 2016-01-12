@@ -18,7 +18,7 @@ void main() {
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
       when(request.response).thenReturn(response);
-      await p.handle(request);
+      await p.handle(request, null);
       verify(response.writeln('Test'));
     });
 
@@ -29,7 +29,7 @@ void main() {
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
       when(request.response).thenReturn(response);
-      await p.handle(request);
+      await p.handle(request, new Map());
       verify(response.writeln('Test'));
       verify(response.writeln('Chained'));
     });
@@ -41,7 +41,7 @@ void main() {
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
       when(request.response).thenReturn(response);
-      await p.handle(request);
+      await p.handle(request, new Map());
       verify(response.writeln('Version:3'));
       verify(response.writeln('Chained'));
     });

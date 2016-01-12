@@ -9,7 +9,7 @@ abstract class Middleware {
   /// sure that the `Future` returned from this method completes after the
   /// one returned from the call to `next.handle()`.
   ///
-  /// Middlewares can store arbitrary values in the [context] parameter. These
-  /// values will be available to all following middlewares in the pipeline.
-  Future handle(HttpRequest request, Map context, Next next);
+  /// The [context] parameter is the same object that was passed to
+  /// `Pipeline.handle`. Middlewares can use it access/store shared data.
+  Future handle(HttpRequest request, Object context, Next next);
 }

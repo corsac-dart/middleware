@@ -9,7 +9,7 @@ class Next {
   Queue<Middleware> _handlers;
   Next(this._handlers);
 
-  Future handle(HttpRequest request, Map context) {
+  Future handle(HttpRequest request, Object context) {
     if (this._handlers.isEmpty) {
       return new Future.value();
     } else {
@@ -27,10 +27,9 @@ class Pipeline {
   Pipeline(this.handlers);
 
   /// Executes middleware pipeline.
-  Future handle(HttpRequest request) {
+  Future handle(HttpRequest request, Object context) {
     Queue queue = new Queue.from(this.handlers);
     Next next = new Next(queue);
-    Map context = new Map();
 
     return next.handle(request, context);
   }

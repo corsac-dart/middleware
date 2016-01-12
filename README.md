@@ -36,7 +36,7 @@ import 'package:corsac_middleware/corsac_middleware.dart';
 
 class HelloWorldMiddleware implements Middleware {
   @override
-  Future handle(HttpRequest request, Map context, Next next) {
+  Future handle(HttpRequest request, Object context, Next next) {
     // Access response as you usually do.
     request.response.writeln('Hello world');
     return new Future.value();
@@ -57,7 +57,7 @@ Future main() async {
   final server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 8080);
   final pipeline = new Pipeline([new HelloWorldMiddleware()]);
   await for (HttpRequest request in server) {
-    await pipeline.handle(request);
+    await pipeline.handle(request, null);
     request.response.close();
   }
 }
