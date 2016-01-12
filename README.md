@@ -36,7 +36,7 @@ import 'package:corsac_middleware/corsac_middleware.dart';
 
 class HelloWorldMiddleware implements Middleware {
   @override
-  Future handle(HttpRequest request, Next next) {
+  Future handle(HttpRequest request, Map context, Next next) {
     // Access response as you usually do.
     request.response.writeln('Hello world');
     return new Future.value();
@@ -66,6 +66,9 @@ Future main() async {
 Please note:
 
 * Since middlewares have full access to `HttpResponse` it is responsibility of
-  implementer to make sure `response.close()` is called only once at the end
-  of the pipeline. The same applies to sending headers after any content
-  has been written to the response.
+  implementer to make sure response is handled correctly and closed (for
+  instance, headers are not being sent after data has been written).
+
+## License
+
+BSD-2

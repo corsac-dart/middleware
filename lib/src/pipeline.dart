@@ -9,12 +9,12 @@ class Next {
   Queue<Middleware> _handlers;
   Next(this._handlers);
 
-  Future handle(HttpRequest request) {
+  Future handle(HttpRequest request, Map context) {
     if (this._handlers.isEmpty) {
       return new Future.value();
     } else {
       Middleware handler = this._handlers.removeFirst();
-      return handler.handle(request, this);
+      return handler.handle(request, context, this);
     }
   }
 }
@@ -30,7 +30,8 @@ class Pipeline {
   Future handle(HttpRequest request) {
     Queue queue = new Queue.from(this.handlers);
     Next next = new Next(queue);
+    Map context = new Map();
 
-    return next.handle(request);
+    return next.handle(request, context);
   }
 }

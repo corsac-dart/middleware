@@ -33,12 +33,24 @@ void main() {
       verify(response.writeln('Test'));
       verify(response.writeln('Chained'));
     });
+
+    test('it has shared context', () async {
+      Pipeline p = new Pipeline(
+          [new ChainingMiddleware(), new ContextAccessingMiddleware()]);
+
+      var request = new MockHttpRequest();
+      var response = new MockHttpResponse();
+      when(request.response).thenReturn(response);
+      await p.handle(request);
+      verify(response.writeln('Version:3'));
+      verify(response.writeln('Chained'));
+    });
   });
 }
 
 class SimpleMiddleware implements Middleware {
   @override
-  Future handle(HttpRequest request, Next next) {
+  Future handle(HttpRequest request, Map context, Next next) {
     request.response.writeln('Test');
     return new Future.value();
   }
@@ -46,8 +58,18 @@ class SimpleMiddleware implements Middleware {
 
 class ChainingMiddleware implements Middleware {
   @override
-  Future handle(HttpRequest request, Next next) async {
-    await next.handle(request);
+  Future handle(HttpRequest request, Map context, Next next) async {
+    context[#version] = 3;
+    await next.handle(request, context);
     request.response.writeln('Chained');
+  }
+}
+
+class ContextAccessingMiddleware implements Middleware {
+  @override
+  Future handle(HttpRequest request, Map context, Next next) {
+    var v = context[#version];
+    request.response.writeln('Version:${v}');
+    return new Future.value();
   }
 }
