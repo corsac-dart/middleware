@@ -14,7 +14,7 @@ class MockHttpResponse extends Mock implements HttpResponse {}
 void main() {
   group('Pipeline:', () {
     test('it executes one handler', () async {
-      Pipeline p = new Pipeline([new SimpleMiddleware()]);
+      Pipeline p = new Pipeline([new SimpleMiddleware()].toSet());
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
       when(request.response).thenReturn(response);
@@ -23,8 +23,8 @@ void main() {
     });
 
     test('it executes two handlers', () async {
-      Pipeline p =
-          new Pipeline([new ChainingMiddleware(), new SimpleMiddleware()]);
+      Pipeline p = new Pipeline(
+          [new ChainingMiddleware(), new SimpleMiddleware()].toSet());
 
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
@@ -36,7 +36,7 @@ void main() {
 
     test('it has shared context', () async {
       Pipeline p = new Pipeline(
-          [new ChainingMiddleware(), new ContextAccessingMiddleware()]);
+          [new ChainingMiddleware(), new ContextAccessingMiddleware()].toSet());
 
       var request = new MockHttpRequest();
       var response = new MockHttpResponse();
@@ -44,6 +44,17 @@ void main() {
       await p.handle(request, new Map());
       verify(response.writeln('Version:3'));
       verify(response.writeln('Chained'));
+    });
+
+    test('it executes beforeHandlers first', () async {
+      var p = new Pipeline([new SimpleMiddleware()].toSet());
+      p.beforeHandlers.add(new BeforeMiddleware());
+
+      var request = new MockHttpRequest();
+      var response = new MockHttpResponse();
+      when(request.response).thenReturn(response);
+      await p.handle(request, new Map());
+      verifyInOrder([response.writeln('Before'), response.writeln('Test'),]);
     });
   });
 }
@@ -71,5 +82,13 @@ class ContextAccessingMiddleware implements Middleware {
     var v = context[#version];
     request.response.writeln('Version:${v}');
     return new Future.value();
+  }
+}
+
+class BeforeMiddleware implements Middleware {
+  @override
+  Future handle(HttpRequest request, Object context, Next next) {
+    request.response.writeln('Before');
+    return next.handle(request, context);
   }
 }

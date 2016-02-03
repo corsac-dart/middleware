@@ -10,6 +10,6 @@ abstract class Middleware {
   /// one returned from the call to `next.handle()`.
   ///
   /// The [context] parameter is the same object that was passed to
-  /// `Pipeline.handle`. Middlewares can use it access/store shared data.
+  /// `Pipeline.handle`. Middlewares can use it to access/store shared data.
   Future handle(HttpRequest request, Object context, Next next);
 }
